@@ -12,14 +12,14 @@ stages {
         }
     }
 
-    stage('Test') {
+    stage('Teste Unitário') {
         steps {
-            sh "${mvnCmd} test"
+            sh "${mvnC  md} test"
             step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
         }
     }
 
-    stage('Analise de Codigo') {
+    stage('Analise de Código') {
         steps {
             script {
             //    sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -DskipTests=true"
@@ -47,7 +47,7 @@ stages {
             }
         }
     }
-    stage('Deploy DEV') {
+    stage('Deploy em Desenvolvimento') {
         steps {
             script {
                 openshift.withCluster() {
@@ -64,18 +64,18 @@ stages {
         }
         steps {
             timeout(time:15, unit:'MINUTES') {
-                input message: "Promote to STAGE?", ok: "Promote"
+                input message: "Promover para Homologação?", ok: "Promote"
             }
 
             script {
                 openshift.withCluster() {
-                    openshift.tag("${env.DEV_PROJECT}/thorntail-demo:latest", "${env.STAGE_PROJECT}/tasks:stage")
+                    openshift.tag("${env.DEV_PROJECT}/thorntail-demo:latest", "${env.STAGE_PROJECT}/thorntail-demo:stage")
                 }
             }
         }
     }
 
-    stage('Deploy STAGE') {
+    stage('Deploy em Homologação') {
         steps {
             script {
                 openshift.withCluster() {
